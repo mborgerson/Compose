@@ -1,0 +1,7 @@
+<div>
+  <button class="btn btn-default" ng-click="create()">New Post</button>
+  <hr />
+  <ul class="list-group" ng-repeat="post in posts">
+    <li class="list-group-item"><a href="/admin/edit/{{post._id}}">{{post.title}} ({{post.date | date:'yyyy-MM-dd'}}) <span class="label label-info" ng-if="post.draft">Draft</span></a></li>
+  </ul>
+</div>

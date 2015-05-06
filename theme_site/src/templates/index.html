@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Index</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="/assets/css/style.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="page-header">
+      <h1><a href="/">Index</a></h1>
+    </div>
+    <% range $key, $post := .Posts %>
+    <h2><a href="/<% $post.Slug %>"><% $post.Title %></a></h2>
+    <% $post.RenderBodySnippet 300 "..." %>
+    <a href="/<% $post.Slug %>" class="btn btn-primary">Read More</a>
+    <hr />
+    <% end %>
+    <nav>
+      <ul class="pager">
+      <% if eq .CurrentPage 2 %>
+        <li class="previous"><a href="/"><span aria-hidden="true">&larr;</span> Newer</a></li>
+      <% else if gt .CurrentPage 1 %>
+        <li class="previous"><a href="/<% sub .CurrentPage 1 %>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+      <% end %>
+      <% if lt .CurrentPage .TotalPages %>
+        <li class="next"><a href="/<% add .CurrentPage 1 %>">Older <span aria-hidden="true">&rarr;</span></a></li>
+      <% end %>
+      </ul>
+    </nav>
+  </div>
+</body>
+</html>

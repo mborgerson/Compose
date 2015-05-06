@@ -1,0 +1,86 @@
+<div>
+  <div class="clearfix">
+  <a href="/admin/posts">&larr;Back</a>
+
+  <!-- Actions button -->
+  <div class="btn-group pull-right">
+    <button type="button" class="btn btn-primary" ng-click="save()">Save</button>
+    <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+      <span class="caret"></span>
+      <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#" ng-click="promptRemove()">Delete</a></li>
+    </ul>
+  </div>
+  </div>
+
+  <div class="page-header">
+    <h1>{{article.title}}</h1>
+  </div>
+
+  <div role="tabpanel">
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs nav-justified" id="editPostTabs">
+      <li role="presentation" class="active"><a href="#details">Details</a></li>
+      <li role="presentation"><a href="#content">Content</a></li>
+      <li role="presentation"><a href="#files">Files</a></li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- Details Tab -->
+      <div role="tabpanel" class="tab-pane active" id="details">
+        <div class="form-group">
+          <label for="inputTitle">Title</label>
+          <input type="text" class="form-control" id="inputTitle" placeholder="Title" ng-model="article.title">
+        </div>
+        <div class="form-group">
+          <label for="inputSlug">Slug</label>
+          <input type="text" class="form-control" id="inputSlug" placeholder="Slug" ng-model="article.slug">
+        </div>
+        <div class="form-group">
+          <label for="inputDraft">Publish</label>
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" id="inputDraft" ng-model="article.draft"> Draft
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="datepicker">Published On</label>
+          <div class="dropdown">
+              <a class="dropdown-toggle my-toggle-select" id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="">
+                  <div class="input-group">
+                    <input type="text" class="form-control" ng-model="article.date">
+                    <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                  </div>
+              </a>
+              <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                  <datetimepicker data-ng-model="article.date"
+                                  data-datetimepicker-config="{ dropdownSelector: '.my-toggle-select' }"></datetimepicker>
+              </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Tab -->
+      <div role="tabpanel" class="tab-pane" id="content">
+        <div ui-ace="{useWrapMode : true}" ng-model="article.body"></div>
+      </div>
+
+      <!-- Files Tab -->
+      <div role="tabpanel" class="tab-pane" id="files">
+        <div class="form-group">
+          <form id="my-awesome-dropzone" action="/upload/" class="dropzone" drop-zone></form>
+          <ul class="list-group">
+            <li class="list-group-item" ng-repeat="file in files">{{ file.filename }}<a href="#" ng-click="deleteFile(file._id)"><span class="glyphicon glyphicon-trash pull-right"></span></a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

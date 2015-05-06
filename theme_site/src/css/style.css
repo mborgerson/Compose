@@ -1,0 +1,35 @@
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.dropzone {
+    background-color: #f0f0f0;
+    border: 3px #ddd dashed;
+    border-radius: 3px;
+    padding: 2em;
+    margin: 1em 0;
+}
+
+.fixed-width-text {
+    font-family: "Menlo", "Consolas", "Courier New", monospace;
+}
+
+.tab-content {
+    padding: 1em;
+}
+
+img {
+    max-width: 100%;
+}
+
+    .ace_editor {
+        margin: 0;
+        /*position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;*/
+        width: 100%;
+        min-height: 500px;
+    }

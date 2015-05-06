@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="Admin">
+  <head>
+    <title>Admin</title>
+    <meta charset="utf-8" />
+    <base href="/admin/">
+    <script type="text/javascript" src="/admin/assets/js/main.js"></script>
+    <link rel="stylesheet" href="/admin/assets/css/style.css">
+  </head>
+  <body>
+    <nav ng-controller="MainController" class="navbar navbar-inverse">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/admin/">Admin</a>
+        </div>
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="/admin/posts">Posts</a></li>
+            <li><a href="/admin/settings">Settings</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/logout/">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container" ng-view></div>
+  </body>
+</html>
