@@ -28,7 +28,7 @@ import (
 
 var templates *template.Template
 var AdminTemplates *template.Template
-var IndexRegExp = regexp.MustCompile("^/([0-9]+)?$")
+var IndexRegExp = regexp.MustCompile("^/([0-9]*)(/?)$")
 var PostRegExp = regexp.MustCompile("^/([A-Za-z0-9-]+)(/.*)?$")
 
 // MainHandler is the handler which will determine if the request is for the
@@ -41,6 +41,11 @@ func MainHandler(w http.ResponseWriter, r *http.Request) {
         // Index page
         page := 1
         if m[1] != "" {
+            if m[2] == "" {
+                // Enforce trailing slash
+                http.Redirect(w, r, strings.Join([]string{r.URL.Path, "/"}, ""), 301)
+                return
+            }
             pageConv, err := strconv.ParseInt(m[1], 10, 0)
             if err == nil {
                 page = int(pageConv)

@@ -11,9 +11,9 @@
       <h1><a href="/">Index</a></h1>
     </div>
     <% range $key, $post := .Posts %>
-    <h2><a href="/<% $post.Slug %>"><% $post.Title %></a></h2>
+    <h2><a href="/<% $post.Slug %>/"><% $post.Title %></a></h2>
     <% $post.RenderBodySnippet 300 "..." %>
-    <a href="/<% $post.Slug %>" class="btn btn-primary">Read More</a>
+    <a href="/<% $post.Slug %>/" class="btn btn-primary">Read More</a>
     <hr />
     <% end %>
     <nav>
@@ -21,10 +21,10 @@
       <% if eq .CurrentPage 2 %>
         <li class="previous"><a href="/"><span aria-hidden="true">&larr;</span> Newer</a></li>
       <% else if gt .CurrentPage 1 %>
-        <li class="previous"><a href="/<% sub .CurrentPage 1 %>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+        <li class="previous"><a href="/<% sub .CurrentPage 1 %>/"><span aria-hidden="true">&larr;</span> Newer</a></li>
       <% end %>
       <% if lt .CurrentPage .TotalPages %>
-        <li class="next"><a href="/<% add .CurrentPage 1 %>">Older <span aria-hidden="true">&rarr;</span></a></li>
+        <li class="next"><a href="/<% add .CurrentPage 1 %>/">Older <span aria-hidden="true">&rarr;</span></a></li>
       <% end %>
       </ul>
     </nav>
