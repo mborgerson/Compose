@@ -17,7 +17,9 @@ package main
 
 import (
     "encoding/json"
+    "errors"
     "os"
+    "path/filepath"
 )
 
 const (
@@ -25,6 +27,8 @@ const (
 )
 
 type Config struct {
+    BindHost           string
+    BindPort           int
     DatabaseHost       string
     DatabaseName       string
     AssetsPath         string
@@ -38,13 +42,23 @@ var config *Config = nil
 
 // GetDefaultConfig returns the default configuration settings.
 func GetDefaultConfig() (*Config, error) {
+    // Determine the package path (i.e. $GOPATH/src/github.com/mborgerson/Compose/theme_)
+    gopath := os.Getenv("GOPATH")
+    if gopath == "" {
+        panic(errors.New("GOPATH was not set"))
+    }
+
+    src_path := filepath.Join(gopath, "src", "github.com", "mborgerson", "Compose")
+
     return &Config{
+        BindHost:           "0.0.0.0",
+        BindPort:           8080,
         DatabaseHost:       "127.0.0.1",
         DatabaseName:       "compose",
-        AssetsPath:         "theme_site/dist/assets",
-        TemplatesPath:      "theme_site/dist/templates",
-        AdminAssetsPath:    "theme_admin/dist/assets",
-        AdminTemplatesPath: "theme_admin/dist/templates",
+        AssetsPath:         filepath.Join(src_path, "theme_site", "dist", "assets"),
+        TemplatesPath:      filepath.Join(src_path, "theme_site", "dist", "templates"),
+        AdminAssetsPath:    filepath.Join(src_path, "theme_admin", "dist", "assets"),
+        AdminTemplatesPath: filepath.Join(src_path, "theme_admin", "dist", "templates"),
         IndexPostsPerPage:  5,
     }, nil
 }

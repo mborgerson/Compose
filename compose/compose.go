@@ -273,5 +273,5 @@ func main() {
     http.HandleFunc("/",                         MainHandler)
 
     // Begin serving
-    http.ListenAndServe(":8080", nil)
+    http.ListenAndServe(fmt.Sprintf("%s:%d", config.BindHost, config.BindPort), nil)
 }
