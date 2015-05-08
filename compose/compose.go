@@ -18,8 +18,6 @@ package main
 import (
     "fmt"
     "html/template"
-    "io"
-    "mime"
     "net/http"
     "os"
     "path/filepath"
@@ -79,14 +77,19 @@ func ViewHandler(w http.ResponseWriter, r *http.Request, slug string, filename s
     }
 
     if filename == "/" {
+        if CheckModifiedHandler(w, r, post.LastModified) {
+            // Not modified
+            return
+        }
+
+        w.Header().Set("Last-Modified", post.LastModified.UTC().Format(HttpDateTimeFormat))
         err = templates.ExecuteTemplate(w, "post.html", post)
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)
         }
-        return
     } else {
-        // Get the list of files for this post and see if this request
-        // matches any of those files
+        // Get the list of files for this post and see if the filename in this
+        // request matches any of those files
         file_infos, err := GetMultFileInfoById(post.Files)
         if err != nil {
             http.NotFound(w, r)
@@ -94,24 +97,11 @@ func ViewHandler(w http.ResponseWriter, r *http.Request, slug string, filename s
         }
         for _, info := range file_infos {
             if info.Name == filename[1:len(filename)] {
-                // Guess mime from extension
-                ext := filepath.Ext(info.Name)
-                mime_type := mime.TypeByExtension(ext)
-
-                // Set header
-                if mime_type != "" {
-                    w.Header().Set("Content-Type", mime_type)
-                }
-
-                // Send File
-                file, _ := GetFileById(info.Id)
-                defer file.Close()
-                io.Copy(w, file)
+                DownloadHandler(w, r, info.Id)
                 return
             }
         }
         http.NotFound(w, r)
-        return
     }
 }
 

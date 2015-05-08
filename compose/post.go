@@ -25,13 +25,14 @@ import (
 )
 
 type Post struct {
-    Id    bson.ObjectId   `json:"_id,omitempty" bson:"_id,omitempty"`
-    Title string          `json:"title"         bson:"title"`
-    Date  time.Time       `json:"date"          bson:"date"`
-    Slug  string          `json:"slug"          bson:"slug"`
-    Draft bool            `json:"draft"         bson:"draft"`
-    Body  string          `json:"body"          bson:"body"`
-    Files []bson.ObjectId `json:"files"         bson:"files"`
+    Id           bson.ObjectId   `json:"_id,omitempty" bson:"_id,omitempty"`
+    Title        string          `json:"title"         bson:"title"`
+    Date         time.Time       `json:"date"          bson:"date"`
+    LastModified time.Time       `json:"last_modified" bson:"last_modified"`
+    Slug         string          `json:"slug"          bson:"slug"`
+    Draft        bool            `json:"draft"         bson:"draft"`
+    Body         string          `json:"body"          bson:"body"`
+    Files        []bson.ObjectId `json:"files"         bson:"files"`
 }
 
 // FindPostBySlug finds a post by the slug. An error is returned if the post
@@ -109,6 +110,7 @@ func CountPosts(includeDrafts bool) (int, error) {
 func (post *Post) Save() (*Post, error) {
     db := GetDatabaseHandle()
     c := db.C("posts")
+    post.LastModified = time.Now()
     _, err := c.UpsertId(post.Id, post)
     return post, err
 }

@@ -20,8 +20,42 @@ import (
     "gopkg.in/mgo.v2"
     "gopkg.in/mgo.v2/bson"
     "io"
+    "mime"
     "net/http"
+    "path/filepath"
+    "time"
 )
+
+func DownloadHandler(w http.ResponseWriter, r *http.Request, id bson.ObjectId) {
+    file, err := GetFileById(id)
+    if err != nil {
+        http.NotFound(w, r)
+        return
+    }
+    defer file.Close()
+
+    info, _ := GetFileInfo(file)
+
+    if CheckModifiedHandler(w, r, info.UploadDate) {
+        // Not modified
+        return
+    }
+
+    // Guess mime from extension
+    ext := filepath.Ext(info.Name)
+    mime_type := mime.TypeByExtension(ext)
+    if mime_type != "" {
+        w.Header().Set("Content-Type", mime_type)
+    }
+
+    // Cache headers
+    w.Header().Set("Last-Modified", info.UploadDate.UTC().Format(HttpDateTimeFormat))
+    w.Header().Set("Cache-Control", "public, max-age=3600")
+
+    // Send data
+    io.Copy(w, file)
+
+}
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
     db := GetDatabaseHandle()
@@ -69,7 +103,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 type FileInfo struct {
     Id         bson.ObjectId `json:"_id,omitempty" bson:"_id,omitempty"`
     Name       string        `json:"filename"      bson:"filename"` 
-    UploadDate string        `json:"uploadDate"    bson:"uploadDate"`
+    UploadDate time.Time     `json:"uploadDate"    bson:"uploadDate"`
     Size       int64         `json:"size"          bson:"size"` 
 }
 
@@ -81,13 +115,7 @@ func GetFileInfoById(id bson.ObjectId) (*FileInfo, error) {
         return nil, err
     }
     defer file.Close()
-
-    info := &FileInfo{Id:         file.Id().(bson.ObjectId),
-                      Name:       file.Name(),
-                      UploadDate: file.UploadDate().String(),
-                      Size:       file.Size()}
-
-    return info, nil
+    return GetFileInfo(file)
 }
 
 func GetFileById(id bson.ObjectId) (*mgo.GridFile, error) {
@@ -95,6 +123,13 @@ func GetFileById(id bson.ObjectId) (*mgo.GridFile, error) {
     c := db.GridFS("fs")
     file, err := c.OpenId(id)
     return file, err
+}
+
+func GetFileInfo(file *mgo.GridFile) (*FileInfo, error) {
+    return &FileInfo{Id:         file.Id().(bson.ObjectId),
+                     Name:       file.Name(),
+                     UploadDate: file.UploadDate(),
+                     Size:       file.Size()}, nil
 }
 
 func GetMultFileInfoById(ids []bson.ObjectId) (map[bson.ObjectId]*FileInfo, error) {

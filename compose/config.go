@@ -79,7 +79,7 @@ func LoadConfig(filename string) (*Config, error) {
 
     // Decode the config
     decoder := json.NewDecoder(file)
-    config := &Config{}
+    config, _ := GetDefaultConfig()
     err = decoder.Decode(config)
     if err != nil {
         return nil, err
