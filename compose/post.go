@@ -21,7 +21,10 @@ import (
     "gopkg.in/mgo.v2"
     "gopkg.in/mgo.v2/bson"
     "html/template"
+    "net/http"
     "time"
+
+    "github.com/zenazn/goji/web"
 )
 
 type Post struct {
@@ -148,4 +151,67 @@ func (post *Post) RenderBodySnippet(maxlen int, ellipsis string) (template.HTML,
     }
 
     return template.HTML(truncated), nil
+}
+
+// ViewHandler is the handler for viewing a post.
+func ViewHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+    post, err := FindPostBySlug(c.URLParams["slug"])
+    if post == nil {
+        http.NotFound(w, r)
+        return
+    }
+    if err != nil {
+        panic(err)
+    }
+
+    if CheckModifiedHandler(w, r, post.LastModified) {
+        // Not modified
+        return
+    }
+
+    w.Header().Set("Last-Modified", post.LastModified.UTC().Format(HttpDateTimeFormat))
+    err = templates.ExecuteTemplate(w, "post.html", post)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+}
+// ViewHandler is the handler for viewing a post.
+func ViewHandlerRemoveTrailingSlash(c web.C, w http.ResponseWriter, r *http.Request) {
+    post, err := FindPostBySlug(c.URLParams["slug"])
+    if post == nil {
+        http.NotFound(w, r)
+        return
+    }
+    if err != nil {
+        panic(err)
+    }
+
+    http.Redirect(w, r, "/"+c.URLParams["slug"], http.StatusMovedPermanently)
+}
+
+// ViewHandler is the handler for viewing a post.
+func ViewFileHandler(c web.C, w http.ResponseWriter, r *http.Request) {
+    post, err := FindPostBySlug(c.URLParams["slug"])
+    if post == nil {
+        http.NotFound(w, r)
+        return
+    }
+    if err != nil {
+        panic(err)
+    }
+
+    // Get the list of files for this post and see if the filename in this
+    // request matches any of those files
+    file_infos, err := GetMultFileInfoById(post.Files)
+    if err != nil {
+        http.NotFound(w, r)
+        return
+    }
+    for _, info := range file_infos {
+        if info.Name == c.URLParams["file"] {
+            DownloadHandler(w, r, info.Id)
+            return
+        }
+    }
+    http.NotFound(w, r)
 }

@@ -188,7 +188,7 @@ angular.module('Admin', ["ngRoute", "ui.ace", "ui.bootstrap.datetimepicker"])
       url: "/api/post/" + $routeParams.postId,
       type: 'DELETE',
       success: function(result) {
-        window.location.replace("/admin/");
+        window.location.replace("/admin");
       }
     });
   }

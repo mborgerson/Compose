@@ -27,8 +27,6 @@ const (
 )
 
 type Config struct {
-    BindHost           string
-    BindPort           int
     DatabaseHost       string
     DatabaseName       string
     AssetsPath         string
@@ -51,8 +49,6 @@ func GetDefaultConfig() (*Config, error) {
     src_path := filepath.Join(gopath, "src", "github.com", "mborgerson", "Compose")
 
     return &Config{
-        BindHost:           "0.0.0.0",
-        BindPort:           8080,
         DatabaseHost:       "127.0.0.1",
         DatabaseName:       "compose",
         AssetsPath:         filepath.Join(src_path, "theme_site", "dist", "assets"),

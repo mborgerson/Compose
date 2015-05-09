@@ -22,138 +22,15 @@ import (
     "os"
     "path/filepath"
     "regexp"
-    "strconv"
-    "strings"
+    // "strconv"
+    // "strings"
+
+
+    "github.com/zenazn/goji"
 )
 
 var templates *template.Template
 var AdminTemplates *template.Template
-var IndexRegExp = regexp.MustCompile("^/([0-9]*)(/?)$")
-var PostRegExp = regexp.MustCompile("^/([A-Za-z0-9-]+)(/.*)?$")
-
-// MainHandler is the handler which will determine if the request is for the
-// index or for a post. It will then call the appropriate handler with required
-// parameters. 
-func MainHandler(w http.ResponseWriter, r *http.Request) {
-    // Get slug
-    m := IndexRegExp.FindStringSubmatch(r.URL.Path)
-    if m != nil {
-        // Index page
-        page := 1
-        if m[1] != "" {
-            if m[2] == "" {
-                // Enforce trailing slash
-                http.Redirect(w, r, strings.Join([]string{r.URL.Path, "/"}, ""), 301)
-                return
-            }
-            pageConv, err := strconv.ParseInt(m[1], 10, 0)
-            if err == nil {
-                page = int(pageConv)
-            }
-        }
-
-        IndexHandler(w, r, page)
-        return
-    }
-
-    // Get slug
-    m = PostRegExp.FindStringSubmatch(r.URL.Path)
-    if m != nil {
-        if m[2] == "" {
-            // Enforce trailing slash
-            http.Redirect(w, r, strings.Join([]string{r.URL.Path, "/"}, ""), 301)
-            return
-        }
-
-        ViewHandler(w, r, m[1], m[2])
-        return
-    }
-}
-
-// ViewHandler is the handler for viewing a post.
-func ViewHandler(w http.ResponseWriter, r *http.Request, slug string, filename string) {
-    post, err := FindPostBySlug(slug)
-    if post == nil {
-        http.NotFound(w, r)
-        return
-    }
-    if err != nil {
-        panic(err)
-    }
-
-    if filename == "/" {
-        if CheckModifiedHandler(w, r, post.LastModified) {
-            // Not modified
-            return
-        }
-
-        w.Header().Set("Last-Modified", post.LastModified.UTC().Format(HttpDateTimeFormat))
-        err = templates.ExecuteTemplate(w, "post.html", post)
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-        }
-    } else {
-        // Get the list of files for this post and see if the filename in this
-        // request matches any of those files
-        file_infos, err := GetMultFileInfoById(post.Files)
-        if err != nil {
-            http.NotFound(w, r)
-            return
-        }
-        for _, info := range file_infos {
-            if info.Name == filename[1:len(filename)] {
-                DownloadHandler(w, r, info.Id)
-                return
-            }
-        }
-        http.NotFound(w, r)
-    }
-}
-
-// IndexHandler is the handler for Index pages.
-func IndexHandler(w http.ResponseWriter, r *http.Request, page int) {
-    // Get total number of posts that are not drafts
-    total, err := CountPosts(false)
-    if err != nil {
-        panic(err)
-    }
-    numPages := total/config.IndexPostsPerPage
-    if total % config.IndexPostsPerPage != 0 {
-        numPages += 1
-    }
-
-    // Is this page valid?
-    if page < 1 || (page != 1 && page > numPages) {
-        http.NotFound(w, r)
-        return
-    }
-
-    v := map[string]interface{}{}
-    posts, err := ListPosts((page-1) * config.IndexPostsPerPage,
-                            config.IndexPostsPerPage,
-                            false)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
-    v["Posts"] = posts
-    v["CurrentPage"] = page
-    v["TotalPages"] = numPages
-
-    err = templates.ExecuteTemplate(w, "index.html", v)
-    if err != nil {
-        http.Error(w, err.Error(), http.StatusInternalServerError)
-    }
-}
-
-// AssetsHandler is the handler that will serve assets.
-func AssetsHandler(w http.ResponseWriter, r *http.Request) {
-    if config.AssetsPath != "" {
-        fs := http.StripPrefix("/assets/", http.FileServer(http.Dir(config.AssetsPath)))
-        fs.ServeHTTP(w, r)
-        return
-    }
-    http.NotFound(w, r)
-}
 
 // BuildTemplates builds all the required site templates.
 func BuildTemplates() error {
@@ -179,17 +56,8 @@ func BuildTemplates() error {
         return err
     }
     templates = _templates
-    return nil
-}
 
-// BuildAdminTemplates builds all the required admin templates.
-func BuildAdminTemplates() error {
-    funcMap := template.FuncMap {
-        "add": func(a, b int) int { return a+b },
-        "sub": func(a, b int) int { return a-b },
-    }
-
-    files := []string{
+    files = []string{
         "index.html", 
         "edit.html",
         "posts.html",
@@ -201,10 +69,10 @@ func BuildAdminTemplates() error {
         files[i] = filepath.Join(config.AdminTemplatesPath, file)
     }
 
-    _templates := template.New("base")
+    _templates = template.New("base")
     _templates.Delims("<%", "%>")
     _templates.Funcs(funcMap)
-    _templates, err := _templates.ParseFiles(files...)
+    _templates, err = _templates.ParseFiles(files...)
     if err != nil {
         return err
     }
@@ -240,11 +108,6 @@ func main() {
         fmt.Println("Failed to build templates:", err.Error())
         os.Exit(1)
     }
-    err = BuildAdminTemplates()
-    if err != nil {
-        fmt.Println("Failed to build admin templates:", err.Error())
-        os.Exit(1)
-    }
 
     // Connect to the database
     err = SetupDatabaseSession()
@@ -254,19 +117,28 @@ func main() {
     defer CleanupDatabaseSession()
 
     // Setup the router
-    http.Handle("/api/",                         GetApiHandler())
-    http.HandleFunc("/admin/assets/",            AdminAssetsHandler)
-    http.HandleFunc("/admin/partials/edit/",     MakeRestrictedHttpHandler(AdminEditHandler))
-    http.HandleFunc("/admin/partials/posts/",    MakeRestrictedHttpHandler(AdminPostsHandler))
-    http.HandleFunc("/admin/partials/settings/", MakeRestrictedHttpHandler(AdminSettingsHandler))
-    http.HandleFunc("/admin/",                   MakeRestrictedHttpHandler(AdminHandler))
-    http.HandleFunc("/assets/",                  AssetsHandler)
-    http.HandleFunc("/login/",                   LoginHandler)
-    http.HandleFunc("/logout/",                  LogoutHandler)
-    http.HandleFunc("/setup/",                   SetupHandler)
-    http.HandleFunc("/upload/",                  MakeRestrictedHttpHandler(UploadHandler))
-    http.HandleFunc("/",                         MainHandler)
+    goji.Handle("/api/*",                               GetApiHandler())
+
+    goji.Get("/setup",                                  SetupHandler)
+    goji.Get("/admin/partials/edit",                    MakeRestrictedHttpHandler(AdminEditHandler))
+    goji.Get("/admin/partials/posts",                   MakeRestrictedHttpHandler(AdminPostsHandler))
+    goji.Get("/admin/partials/settings",                MakeRestrictedHttpHandler(AdminSettingsHandler))
+    goji.Get("/admin/assets/*",                         AdminAssetsHandler)
+    goji.Get("/admin/*",                                MakeRestrictedHttpHandler(AdminHandler))
+    
+    goji.Get("/assets/*",                               http.StripPrefix("/assets/", http.FileServer(http.Dir(config.AssetsPath))).ServeHTTP)
+    
+    goji.Get("/login",                                  LoginHandler)
+    goji.Post("/login",                                 LoginHandler)
+    goji.Get("/logout",                                 LogoutHandler)
+    
+    goji.Post("/upload",                                MakeRestrictedHttpHandler(UploadHandler))
+    goji.Get(regexp.MustCompile("^/(?P<page>[0-9]*)$"), IndexHandler)
+ 
+    goji.Get("/:slug",                                  ViewHandler)
+    goji.Get("/:slug/",                                 ViewHandlerRemoveTrailingSlash) // Courtesy redirect for SEO
+    goji.Get("/:slug/:file",                            ViewFileHandler)
 
     // Begin serving
-    http.ListenAndServe(fmt.Sprintf("%s:%d", config.BindHost, config.BindPort), nil)
+    goji.Serve()
 }

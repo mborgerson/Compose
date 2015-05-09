@@ -35,7 +35,7 @@ func MakeRestrictedHttpHandler(handler func(http.ResponseWriter, *http.Request))
             handler(w, r)
         } else {
             // No. Redirect to login page.
-            http.Redirect(w, r, "/login/", http.StatusUnauthorized)
+            http.Redirect(w, r, "/login", http.StatusUnauthorized)
         }
     }
 }
@@ -74,7 +74,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
     c, err := r.Cookie(CookieName)
     if err == nil && IsSessionTokenValid(c.Value) {
         // Yes. Redirect to admin page.
-        http.Redirect(w, r, "/admin/", http.StatusSeeOther)
+        http.Redirect(w, r, "/admin", http.StatusSeeOther)
         return
     }
 
@@ -96,10 +96,10 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
                                            Path:  "/"})
 
             // Continue to admin page.
-            http.Redirect(w, r, "/admin/", http.StatusSeeOther)
+            http.Redirect(w, r, "/admin", http.StatusSeeOther)
         } else {
             // Bad credentials!
-            http.Redirect(w, r, "/login/", http.StatusUnauthorized)
+            http.Redirect(w, r, "/login", http.StatusUnauthorized)
         }
     } else {
         http.Error(w, "Invalid method", http.StatusMethodNotAllowed)
@@ -121,5 +121,5 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
     http.SetCookie(w, &http.Cookie{Name:  CookieName,
                                    Value: "",
                                    Path:  "/"})
-    http.Redirect(w, r, "/login/", http.StatusSeeOther)
+    http.Redirect(w, r, "/login", http.StatusSeeOther)
 }

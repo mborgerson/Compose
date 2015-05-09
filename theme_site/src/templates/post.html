@@ -9,7 +9,7 @@
   <div class="container">
     <div class="page-header">
         <a href="/">&larr;Back</a>
-      <h1><% .Title %>&nbsp;<br /><small><% .Date.Format "January _2, 2006" %></small></h1>
+      <h1><a href="/<% .Slug %>"><% .Title %></a>&nbsp;<br /><small><% .Date.Format "January _2, 2006" %></small></h1>
     </div>
     <% .RenderBody %>
   </div>
