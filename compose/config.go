@@ -51,8 +51,8 @@ func GetDefaultConfig() (*Config, error) {
     return &Config{
         DatabaseHost:       "127.0.0.1",
         DatabaseName:       "compose",
-        AssetsPath:         filepath.Join(src_path, "theme_site", "dist", "assets"),
-        TemplatesPath:      filepath.Join(src_path, "theme_site", "dist", "templates"),
+        AssetsPath:         filepath.Join(src_path, "theme_site",  "dist", "assets"),
+        TemplatesPath:      filepath.Join(src_path, "theme_site",  "dist", "templates"),
         AdminAssetsPath:    filepath.Join(src_path, "theme_admin", "dist", "assets"),
         AdminTemplatesPath: filepath.Join(src_path, "theme_admin", "dist", "templates"),
         IndexPostsPerPage:  5,

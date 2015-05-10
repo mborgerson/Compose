@@ -23,19 +23,22 @@ import (
     "html/template"
     "net/http"
     "time"
-
     "github.com/zenazn/goji/web"
 )
 
-type Post struct {
+type PostHeader struct {
     Id           bson.ObjectId   `json:"_id,omitempty" bson:"_id,omitempty"`
     Title        string          `json:"title"         bson:"title"`
     Date         time.Time       `json:"date"          bson:"date"`
     LastModified time.Time       `json:"last_modified" bson:"last_modified"`
     Slug         string          `json:"slug"          bson:"slug"`
     Draft        bool            `json:"draft"         bson:"draft"`
-    Body         string          `json:"body"          bson:"body"`
     Files        []bson.ObjectId `json:"files"         bson:"files"`
+}
+
+type Post struct {
+                 PostHeader      `json:",inline"       bson:",inline"`
+    Body         string          `json:"body"          bson:"body"`
 }
 
 // FindPostBySlug finds a post by the slug. An error is returned if the post
@@ -81,18 +84,36 @@ func ListPosts(start int, limit int, includeDrafts bool) ([]Post, error) {
     return posts, err
 }
 
+// ListPostHeaders will return a slice of limit reverse-chronologicaly orderded posts,
+// starting from start and optionally including drafts.
+func ListPostHeaders(start int, limit int, includeDrafts bool) ([]PostHeader, error) {
+    db := GetDatabaseHandle()
+    c := db.C("posts")
+    var posts []PostHeader
+    posts = nil
+    var q *mgo.Query
+    if includeDrafts {
+        q = c.Find(nil)
+    } else {
+        q = c.Find(bson.M{"draft":false})
+    }
+    err := q.Sort("-date").Skip(start).Limit(limit).All(&posts)
+    return posts, err
+}
+
 // CreatePost creates a new post object. Call Save() on the post to write it
 // to the database.
 func CreatePost() (*Post, error) {
     id := bson.NewObjectId()
     newPost := &Post{
-        Id:    id,
-        Title: "",
-        Date:  time.Now(),
-        Slug:  "",
-        Draft: true,
-        Body:  "",
-        Files: []bson.ObjectId{}}
+        PostHeader: PostHeader{
+            Id:    id,
+            Title: "",
+            Date:  time.Now(),
+            Slug:  "",
+            Draft: true,
+            Files: []bson.ObjectId{}},
+        Body:  ""}
     return newPost, nil
 }
 
@@ -175,7 +196,8 @@ func ViewHandler(c web.C, w http.ResponseWriter, r *http.Request) {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }
 }
-// ViewHandler is the handler for viewing a post.
+// ViewHandlerRemoveTrailingSlash will remove the trailing slash from a valid
+// post url.
 func ViewHandlerRemoveTrailingSlash(c web.C, w http.ResponseWriter, r *http.Request) {
     post, err := FindPostBySlug(c.URLParams["slug"])
     if post == nil {
@@ -189,7 +211,7 @@ func ViewHandlerRemoveTrailingSlash(c web.C, w http.ResponseWriter, r *http.Requ
     http.Redirect(w, r, "/"+c.URLParams["slug"], http.StatusMovedPermanently)
 }
 
-// ViewHandler is the handler for viewing a post.
+// ViewFileHandler is the handler for viewing a post file.
 func ViewFileHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     post, err := FindPostBySlug(c.URLParams["slug"])
     if post == nil {

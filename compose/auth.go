@@ -18,6 +18,7 @@ package main
 import (
     "errors"
     "net/http"
+    "github.com/zenazn/goji/web"
 )
 
 const (
@@ -26,13 +27,13 @@ const (
 
 // MakeRestrictedHttpHandler creates a wrapper that requires the user to be
 // logged in to access the handler.
-func MakeRestrictedHttpHandler(handler func(http.ResponseWriter, *http.Request)) (func(http.ResponseWriter, *http.Request)) {
-    return func(w http.ResponseWriter, r *http.Request) {
+func MakeRestrictedHttpHandler(handler func(web.C, http.ResponseWriter, *http.Request)) (func(web.C, http.ResponseWriter, *http.Request)) {
+    return func(c web.C, w http.ResponseWriter, r *http.Request) {
         // Get cookie
-        c, err := r.Cookie(CookieName)
-        if err == nil && IsSessionTokenValid(c.Value) {
+        cookie, err := r.Cookie(CookieName)
+        if err == nil && IsSessionTokenValid(cookie.Value) {
             // Valid session. Continue to handler.
-            handler(w, r)
+            handler(c, w, r)
         } else {
             // No. Redirect to login page.
             http.Redirect(w, r, "/login", http.StatusUnauthorized)

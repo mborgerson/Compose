@@ -17,12 +17,13 @@ package main
 
 import (
     "net/http"
+    "github.com/zenazn/goji/web"
 )
 
 // AdminHandler is the main handler for all other admin URLs. Because the admin
 // pages use Angular routing, just return the index page and let the JS side
 // determine what content to show.
-func AdminHandler(w http.ResponseWriter, r *http.Request) {
+func AdminHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     err := AdminTemplates.ExecuteTemplate(w, "index.html", nil)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -30,7 +31,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // AdminEditHandler is a handler for the post edit partial.
-func AdminEditHandler(w http.ResponseWriter, r *http.Request) {
+func AdminEditHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     err := AdminTemplates.ExecuteTemplate(w, "edit.html", nil)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -38,7 +39,7 @@ func AdminEditHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // AdminSettingsHandler is a handler for the settings partial.
-func AdminSettingsHandler(w http.ResponseWriter, r *http.Request) {
+func AdminSettingsHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     err := AdminTemplates.ExecuteTemplate(w, "settings.html", nil)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -46,19 +47,9 @@ func AdminSettingsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // AdminPostsHandler is a handler for the posts partial.
-func AdminPostsHandler(w http.ResponseWriter, r *http.Request) {
+func AdminPostsHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     err := AdminTemplates.ExecuteTemplate(w, "posts.html", nil)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }
-}
-
-// AdminAssetsHandler is a handler to serve admin assets (js, css, etc)
-func AdminAssetsHandler(w http.ResponseWriter, r *http.Request) {
-    if config.AdminAssetsPath != "" {
-        fs := http.StripPrefix("/admin/assets/", http.FileServer(http.Dir(config.AdminAssetsPath)))
-        fs.ServeHTTP(w, r)
-        return
-    }
-    http.NotFound(w, r)
 }

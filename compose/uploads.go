@@ -17,6 +17,7 @@ package main
 
 import (
     "encoding/json"
+    "github.com/zenazn/goji/web"
     "gopkg.in/mgo.v2"
     "gopkg.in/mgo.v2/bson"
     "io"
@@ -57,7 +58,7 @@ func DownloadHandler(w http.ResponseWriter, r *http.Request, id bson.ObjectId) {
 
 }
 
-func UploadHandler(w http.ResponseWriter, r *http.Request) {
+func UploadHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     db := GetDatabaseHandle()
     
     // Create JSON encoder for the response

@@ -16,49 +16,53 @@
 package main
 
 import (
-    "github.com/ant0ine/go-json-rest/rest"
     "gopkg.in/mgo.v2/bson"
     "net/http"
+    "encoding/json"
+    "github.com/zenazn/goji/web"
 )
 
-// MakeRestrictedApiHandler wraps an existing API handler s.t. the user must
-// be logged in before using this API.
-func MakeRestrictedApiHandler(handler func(rest.ResponseWriter, *rest.Request)) (func(rest.ResponseWriter, *rest.Request)) {
-    return func(w rest.ResponseWriter, r *rest.Request) {
-        // Get cookie
-        c, err := r.Cookie(CookieName)
-        if err == nil && IsSessionTokenValid(c.Value) {
-            // Yes. Continue to handler.
-            handler(w, r)
-        } else {
-            // No. Redirect to login page.
-            rest.Error(w, "Unauthorized", http.StatusUnauthorized)
-        }
+func WriteJson(w http.ResponseWriter, obj interface{}) (error) {
+    // Encode the config
+    encoding, err := json.MarshalIndent(obj, "", "  ")
+    if err != nil {
+        return err
     }
+    w.Write(encoding)
+    return err
+}
+
+
+
+// LoadConfig loads the configuration file.
+func DecodeJsonPayload(r *http.Request, obj interface{}) (error) {
+    decoder := json.NewDecoder(r.Body)
+    err := decoder.Decode(obj)
+    return err
 }
 
 // ApiListPosts is a handler to list posts.
-func ApiListPosts(w rest.ResponseWriter, r *rest.Request) {
-    posts, err := ListPosts(0, 0, true)
+func ApiListPosts(c web.C, w http.ResponseWriter, r *http.Request) {
+    posts, err := ListPostHeaders(0, 0, true)
     if err != nil {
         panic(err)
     }
 
-    w.WriteJson(posts)
+    WriteJson(w, posts)
 }
 
 // ApiGetPost is a handler to get a post given an id.
-func ApiGetPost(w rest.ResponseWriter, r *rest.Request) {
-    post, err := FindPostById(bson.ObjectIdHex(r.PathParam("id")))
+func ApiGetPost(c web.C, w http.ResponseWriter, r *http.Request) {
+    post, err := FindPostById(bson.ObjectIdHex(c.URLParams["id"]))
     if err != nil {
-        rest.NotFound(w, r)
+        http.NotFound(w, r)
         return
     }
-    w.WriteJson(post)
+    WriteJson(w, post)
 }
 
 // ApiCreatePost is a handler to create a new post.
-func ApiCreatePost(w rest.ResponseWriter, r *rest.Request) {
+func ApiCreatePost(c web.C, w http.ResponseWriter, r *http.Request) {
     post, err := CreatePost()
     if err != nil {
         panic(err)
@@ -67,29 +71,29 @@ func ApiCreatePost(w rest.ResponseWriter, r *rest.Request) {
     post.Title = "New Post"
     post.Save()
 
-    w.WriteJson(post)
+    WriteJson(w, post)
 }
 
 // ApiDeletePost is a handler to delete a post.
-func ApiDeletePost(w rest.ResponseWriter, r *rest.Request) {
-    post, err := FindPostById(bson.ObjectIdHex(r.PathParam("id")))
+func ApiDeletePost(c web.C, w http.ResponseWriter, r *http.Request) {
+    post, err := FindPostById(bson.ObjectIdHex(c.URLParams["id"]))
     if err != nil {
-        rest.NotFound(w, r)
+        http.NotFound(w, r)
         return
     }
     post.Delete()
 }
 
 // ApiUpdatePost is a handler to update an existing post.
-func ApiUpdatePost(w rest.ResponseWriter, r *rest.Request) {
-    post, err := FindPostById(bson.ObjectIdHex((r.PathParam("id"))))
+func ApiUpdatePost(c web.C, w http.ResponseWriter, r *http.Request) {
+    post, err := FindPostById(bson.ObjectIdHex((c.URLParams["id"])))
     if err != nil {
-        rest.NotFound(w, r)
+        http.NotFound(w, r)
         return
     }
 
     post = &Post{}
-    err = r.DecodeJsonPayload(post)
+    err = DecodeJsonPayload(r, post)
     if err != nil {
         panic(err)
     }
@@ -100,24 +104,24 @@ func ApiUpdatePost(w rest.ResponseWriter, r *rest.Request) {
 }
 
 // ApiGetFileInfo is a handler to get info for a single file, given a file id.
-func ApiGetFileInfo(w rest.ResponseWriter, r *rest.Request) {
-    id := bson.ObjectIdHex(r.PathParam("id"))
+func ApiGetFileInfo(c web.C, w http.ResponseWriter, r *http.Request) {
+    id := bson.ObjectIdHex(c.URLParams["id"])
     info, err := GetFileInfoById(id)
     if err != nil {
-        rest.NotFound(w, r)
+        http.NotFound(w, r)
         return
     }
 
-    w.WriteJson(info)
+    WriteJson(w, info)
 }
 
 // ApiGetFileInfoList is a handler to get the file info for one or more files,
 // given their ids.
-func ApiGetFileInfoList(w rest.ResponseWriter, r *rest.Request) {
+func ApiGetFileInfoList(c web.C, w http.ResponseWriter, r *http.Request) {
     ids := []string{}
-    err := r.DecodeJsonPayload(&ids)
+    err := DecodeJsonPayload(r, &ids)
     if err != nil {
-        rest.NotFound(w, r)
+        http.NotFound(w, r)
         return
     }
 
@@ -128,38 +132,38 @@ func ApiGetFileInfoList(w rest.ResponseWriter, r *rest.Request) {
 
     info, err := GetMultFileInfoById(bson_ids)
     if err != nil {
-        rest.NotFound(w, r)
+        http.NotFound(w, r)
         return
     }
 
-    w.WriteJson(info)
+    WriteJson(w, info)
 }
 
 // ApiDeleteFile is a handler to delete a file, given the id.
-func ApiDeleteFile(w rest.ResponseWriter, r *rest.Request) {
-    file, err := GetFileInfoById(bson.ObjectIdHex(r.PathParam("id")))
+func ApiDeleteFile(c web.C, w http.ResponseWriter, r *http.Request) {
+    file, err := GetFileInfoById(bson.ObjectIdHex(c.URLParams["id"]))
     if err != nil {
-        rest.NotFound(w, r)
+        http.NotFound(w, r)
         return
     }
     file.DeleteFile()
 }
 
 // ApiUpdateSettings is a handler to update the settings.
-func ApiUpdateSettings(w rest.ResponseWriter, r *rest.Request) {
+func ApiUpdateSettings(c web.C, w http.ResponseWriter, r *http.Request) {
     updates := &struct{
         Email    string `json:"email"`
         Password string `json:"password"`
     }{}
 
     // Get session
-    c, err := r.Cookie(CookieName)
-    session, err := FindSessionByToken(c.Value)
+    cookie, err := r.Cookie(CookieName)
+    session, err := FindSessionByToken(cookie.Value)
 
     // Get User
     user, err := FindUserById(session.User)
 
-    err = r.DecodeJsonPayload(updates)
+    err = DecodeJsonPayload(r, updates)
     if err != nil {
         panic(err)
     }
@@ -176,14 +180,14 @@ func ApiUpdateSettings(w rest.ResponseWriter, r *rest.Request) {
 }
 
 // ApiGetSettings is a handler to get the current settings.
-func ApiGetSettings(w rest.ResponseWriter, r *rest.Request) {
+func ApiGetSettings(c web.C, w http.ResponseWriter, r *http.Request) {
     settings := &struct{
         Email    string `json:"email"`
     }{}
 
     // Get session
-    c, err := r.Cookie(CookieName)
-    session, err := FindSessionByToken(c.Value)
+    cookie, err := r.Cookie(CookieName)
+    session, err := FindSessionByToken(cookie.Value)
 
     // Get User
     user, err := FindUserById(session.User)
@@ -193,28 +197,5 @@ func ApiGetSettings(w rest.ResponseWriter, r *rest.Request) {
 
     settings.Email = user.Email
 
-    w.WriteJson(settings)
-}
-
-// GetApiHandler returns the API router.
-func GetApiHandler() http.Handler {
-    api := rest.NewApi()
-    api.Use(rest.DefaultDevStack...)
-    router, err := rest.MakeRouter(
-        &rest.Route{"GET",    "/api/posts",    MakeRestrictedApiHandler(ApiListPosts)},
-        &rest.Route{"POST",   "/api/posts",    MakeRestrictedApiHandler(ApiCreatePost)},
-        &rest.Route{"GET",    "/api/post/:id", MakeRestrictedApiHandler(ApiGetPost)},
-        &rest.Route{"PUT",    "/api/post/:id", MakeRestrictedApiHandler(ApiUpdatePost)},
-        &rest.Route{"DELETE", "/api/post/:id", MakeRestrictedApiHandler(ApiDeletePost)},
-        &rest.Route{"POST",   "/api/file",     MakeRestrictedApiHandler(ApiGetFileInfoList)},
-        &rest.Route{"GET",    "/api/file/:id", MakeRestrictedApiHandler(ApiGetFileInfo)},
-        &rest.Route{"DELETE", "/api/file/:id", MakeRestrictedApiHandler(ApiDeleteFile)},
-        &rest.Route{"GET",    "/api/settings", MakeRestrictedApiHandler(ApiGetSettings)},
-        &rest.Route{"POST",   "/api/settings", MakeRestrictedApiHandler(ApiUpdateSettings)},
-    )
-    if err != nil {
-        panic(err)
-    }
-    api.SetApp(router)
-    return api.MakeHandler()
+    WriteJson(w, settings)
 }

@@ -17,16 +17,12 @@ package main
 
 import (
     "fmt"
+    "github.com/zenazn/goji"
     "html/template"
     "net/http"
     "os"
     "path/filepath"
     "regexp"
-    // "strconv"
-    // "strings"
-
-
-    "github.com/zenazn/goji"
 )
 
 var templates *template.Template
@@ -80,6 +76,10 @@ func BuildTemplates() error {
     return nil
 }
 
+func MakeStaticHandler(prefix, dir string) (http.HandlerFunc) {
+    return http.StripPrefix(prefix, http.FileServer(http.Dir(dir))).ServeHTTP
+}
+
 // main is the entry point. Loads the program resources and begins waiting for
 // connections.
 func main() {
@@ -117,27 +117,37 @@ func main() {
     defer CleanupDatabaseSession()
 
     // Setup the router
-    goji.Handle("/api/*",                               GetApiHandler())
+    //goji.Handle("/api/*",                               GetApiHandler())
 
-    goji.Get("/setup",                                  SetupHandler)
-    goji.Get("/admin/partials/edit",                    MakeRestrictedHttpHandler(AdminEditHandler))
-    goji.Get("/admin/partials/posts",                   MakeRestrictedHttpHandler(AdminPostsHandler))
-    goji.Get("/admin/partials/settings",                MakeRestrictedHttpHandler(AdminSettingsHandler))
-    goji.Get("/admin/assets/*",                         AdminAssetsHandler)
-    goji.Get("/admin/*",                                MakeRestrictedHttpHandler(AdminHandler))
-    
-    goji.Get("/assets/*",                               http.StripPrefix("/assets/", http.FileServer(http.Dir(config.AssetsPath))).ServeHTTP)
-    
-    goji.Get("/login",                                  LoginHandler)
-    goji.Post("/login",                                 LoginHandler)
-    goji.Get("/logout",                                 LogoutHandler)
-    
-    goji.Post("/upload",                                MakeRestrictedHttpHandler(UploadHandler))
-    goji.Get(regexp.MustCompile("^/(?P<page>[0-9]*)$"), IndexHandler)
- 
-    goji.Get("/:slug",                                  ViewHandler)
-    goji.Get("/:slug/",                                 ViewHandlerRemoveTrailingSlash) // Courtesy redirect for SEO
-    goji.Get("/:slug/:file",                            ViewFileHandler)
+    indexRegexp := regexp.MustCompile("^/(?P<page>[0-9]*)$")
+
+    goji.Get(    "/setup",                   SetupHandler)
+    goji.Get(    "/admin/assets/*",          MakeStaticHandler("/admin/assets/", config.AdminAssetsPath))
+    goji.Get(    "/admin/partials/edit",     MakeRestrictedHttpHandler(AdminEditHandler))
+    goji.Get(    "/admin/partials/posts",    MakeRestrictedHttpHandler(AdminPostsHandler))
+    goji.Get(    "/admin/partials/settings", MakeRestrictedHttpHandler(AdminSettingsHandler))
+    goji.Get(    "/admin/",                  http.RedirectHandler("/admin", http.StatusMovedPermanently))
+    goji.Get(    "/admin",                   MakeRestrictedHttpHandler(AdminHandler))
+    goji.Get(    "/admin/*",                 MakeRestrictedHttpHandler(AdminHandler))
+    goji.Post(   "/upload",                  MakeRestrictedHttpHandler(UploadHandler))
+    goji.Get(    "/api/posts",               MakeRestrictedHttpHandler(ApiListPosts))
+    goji.Post(   "/api/posts",               MakeRestrictedHttpHandler(ApiCreatePost))
+    goji.Get(    "/api/post/:id",            MakeRestrictedHttpHandler(ApiGetPost))
+    goji.Put(    "/api/post/:id",            MakeRestrictedHttpHandler(ApiUpdatePost))
+    goji.Delete( "/api/post/:id",            MakeRestrictedHttpHandler(ApiDeletePost))
+    goji.Post(   "/api/file",                MakeRestrictedHttpHandler(ApiGetFileInfoList))
+    goji.Get(    "/api/file/:id",            MakeRestrictedHttpHandler(ApiGetFileInfo))
+    goji.Delete( "/api/file/:id",            MakeRestrictedHttpHandler(ApiDeleteFile))
+    goji.Get(    "/api/settings",            MakeRestrictedHttpHandler(ApiGetSettings))
+    goji.Post(   "/api/settings",            MakeRestrictedHttpHandler(ApiUpdateSettings))
+    goji.Get(    "/assets/*",                MakeStaticHandler("/assets/", config.AssetsPath))
+    goji.Get(    "/login",                   LoginHandler)
+    goji.Post(   "/login",                   LoginHandler)
+    goji.Get(    "/logout",                  LogoutHandler)
+    goji.Get(    indexRegexp,                IndexHandler)
+    goji.Get(    "/:slug",                   ViewHandler)
+    goji.Get(    "/:slug/",                  ViewHandlerRemoveTrailingSlash)
+    goji.Get(    "/:slug/:file",             ViewFileHandler)
 
     // Begin serving
     goji.Serve()

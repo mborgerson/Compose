@@ -4,7 +4,7 @@ angular.module('Admin', ["ngRoute", "ui.ace", "ui.bootstrap.datetimepicker"])
   return function($scope, element, attrs) {
 
     element.dropzone({ 
-        url: "/upload/",
+        url: "/upload",
         init: function() {
           this.on("success", function(file, response) {
             response = JSON.parse(response)
