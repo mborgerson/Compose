@@ -1,10 +1,10 @@
 Compose
 =======
-**Compose** is a simple blogging platform that I initially built over the course of a couple weekends to write and serve content on my own [blog](https://mborgerson.com).
+**Compose** is a simple blogging platform that I initially built over the course of a couple weekends to write and serve content on my [website](https://mborgerson.com).
 
-I decided to use the [Go language](https://golang.org/) over other more popular languages largely because it's a language that I had been wanting to learn. As someone who loves C and Python, I think Go is pretty awesome. I highly recommend spending some time with it or using it for your next project. 
+I decided to use the [Go Programming Language](https://golang.org/) over other more popular languages largely because it's a language that I had been wanting to learn. As someone who loves C and Python, I think Go is pretty awesome. I highly recommend spending some time with it or trying it out for your next project. 
 
-I had fun building and using Compose, and I think others might too. It is still in its infancy, but it is usable. If you are interested in contributing, feel free to send me a pull request.
+I had fun building and using Compose, and I think others might too. It is still in alpha stages, but it is usable. If you're interested in contributing feel free to send me feedback or, better yet, a pull request.
 
 Installing
 ----------
@@ -36,9 +36,7 @@ On Mac OS X
 
 ### Setup Go Workspace
 
-    For those unfamiliar with Go, a workspace is needed when developing or
-    installing Go packages. To create a workspace, simply assign the `GOPATH`
-    environment variable.
+    For those unfamiliar with Go, a workspace is needed when developing or installing Go packages. To create a workspace, simply assign the `GOPATH` environment variable.
 
     $ mkdir $HOME/go
     $ export GOPATH=$HOME/go
@@ -48,8 +46,10 @@ On Mac OS X
 
     $ go install github.com/mborgerson/compose
 
-Build the Themes
-----------------
+Building the Themes
+-------------------
+For running Compose as-is, you do not need to build the themes. If you are developing Compose however, you will probably want to modify the themes/templates.
+
 ### Install Required Dependencies
 
 To build the themes, Node.js and NPM are required.
@@ -80,7 +80,7 @@ Install client-side dependencies.
 
 ### Build
 
-Finally, just run `gulp` to build the theme.
+Finally, run `gulp` to build the theme.
 
     $ gulp
 
@@ -147,7 +147,7 @@ If you're using a version of Ubuntu with Upstart (e.g. 14.04), you can copy the 
         export GOPATH="/srv/blog/go_workspace"
         echo $$ > /var/run/compose.pid
         chdir /srv/blog/
-        exec su -s /bin/sh -c 'exec "$0" "$@"' www-data -- compose
+        exec su -s /bin/sh -c 'exec "$0" "$@"' www-data -- /srv/blog/go_workspace/bin/compose
 
     end script
 

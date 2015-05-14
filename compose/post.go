@@ -191,7 +191,7 @@ func ViewHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     }
 
     w.Header().Set("Last-Modified", post.LastModified.UTC().Format(HttpDateTimeFormat))
-    err = templates.ExecuteTemplate(w, "post.html", post)
+    err = SiteTemplates.ExecuteTemplate(w, "post.html", post)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }

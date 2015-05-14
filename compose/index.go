@@ -16,12 +16,12 @@
 package main
 
 import (
-    "net/http"
     "github.com/zenazn/goji/web"
+    "net/http"
     "strconv"
 )
 
-// IndexHandler is the handler for Index pages.
+// IndexHandler is the handler for Index page(s).
 func IndexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     page := 1
     if c.URLParams["page"] != "" {
@@ -59,7 +59,7 @@ func IndexHandler(c web.C, w http.ResponseWriter, r *http.Request) {
     v["CurrentPage"] = page
     v["TotalPages"] = numPages
 
-    err = templates.ExecuteTemplate(w, "index.html", v)
+    err = SiteTemplates.ExecuteTemplate(w, "index.html", v)
     if err != nil {
         http.Error(w, err.Error(), http.StatusInternalServerError)
     }

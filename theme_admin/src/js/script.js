@@ -269,6 +269,9 @@ angular.module('Admin', ["ngRoute", "ui.ace", "ui.bootstrap.datetimepicker"])
 
 .config(function($routeProvider, $locationProvider) {
   $routeProvider
+  .when('/', {
+    redirectTo: '/posts'
+  })
   .when('/settings', {
     templateUrl: '/admin/partials/settings',
     controller: 'SettingsController'

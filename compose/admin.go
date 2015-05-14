@@ -16,8 +16,8 @@
 package main
 
 import (
-    "net/http"
     "github.com/zenazn/goji/web"
+    "net/http"
 )
 
 // AdminHandler is the main handler for all other admin URLs. Because the admin

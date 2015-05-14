@@ -25,7 +25,7 @@ import (
     "regexp"
 )
 
-var templates *template.Template
+var SiteTemplates *template.Template
 var AdminTemplates *template.Template
 
 // BuildTemplates builds all the required site templates.
@@ -44,14 +44,14 @@ func BuildTemplates() error {
         files[i] = filepath.Join(config.TemplatesPath, file)
     }
 
-    _templates := template.New("base")
-    _templates.Delims("<%", "%>")
-    _templates.Funcs(funcMap)
-    _templates, err := _templates.ParseFiles(files...)
+    tmpl := template.New("base")
+    tmpl.Delims("<%", "%>")
+    tmpl.Funcs(funcMap)
+    tmpl, err := tmpl.ParseFiles(files...)
     if err != nil {
         return err
     }
-    templates = _templates
+    SiteTemplates = tmpl
 
     files = []string{
         "index.html", 
@@ -65,14 +65,14 @@ func BuildTemplates() error {
         files[i] = filepath.Join(config.AdminTemplatesPath, file)
     }
 
-    _templates = template.New("base")
-    _templates.Delims("<%", "%>")
-    _templates.Funcs(funcMap)
-    _templates, err = _templates.ParseFiles(files...)
+    tmpl = template.New("base")
+    tmpl.Delims("<%", "%>")
+    tmpl.Funcs(funcMap)
+    tmpl, err = tmpl.ParseFiles(files...)
     if err != nil {
         return err
     }
-    AdminTemplates = _templates
+    AdminTemplates = tmpl
     return nil
 }
 
@@ -117,10 +117,6 @@ func main() {
     defer CleanupDatabaseSession()
 
     // Setup the router
-    //goji.Handle("/api/*",                               GetApiHandler())
-
-    indexRegexp := regexp.MustCompile("^/(?P<page>[0-9]*)$")
-
     goji.Get(    "/setup",                   SetupHandler)
     goji.Get(    "/admin/assets/*",          MakeStaticHandler("/admin/assets/", config.AdminAssetsPath))
     goji.Get(    "/admin/partials/edit",     MakeRestrictedHttpHandler(AdminEditHandler))
@@ -144,6 +140,7 @@ func main() {
     goji.Get(    "/login",                   LoginHandler)
     goji.Post(   "/login",                   LoginHandler)
     goji.Get(    "/logout",                  LogoutHandler)
+    indexRegexp := regexp.MustCompile("^/(?P<page>[0-9]*)$")
     goji.Get(    indexRegexp,                IndexHandler)
     goji.Get(    "/:slug",                   ViewHandler)
     goji.Get(    "/:slug/",                  ViewHandlerRemoveTrailingSlash)
