@@ -4,7 +4,7 @@ Compose
 
 I decided to use the [Go Programming Language](https://golang.org/) over other more popular languages largely because it's a language that I had been wanting to learn. As someone who loves C and Python, I think Go is pretty awesome. I highly recommend spending some time with it or trying it out for your next project. [MongoDB](https://www.mongodb.org/) is used to store all the data.
 
-I had fun building and using Compose, and I think others might too. It is still in alpha stages and as such it is subject to some changes, but it is usable. If you're interested in contributing, feel free to send me feedback or, better yet, a pull request.
+I had fun building and using Compose, and I think others might too. It is still in pre-alpha stages and as such it is subject to some changes, but it is usable. If you're interested in contributing, feel free to send me feedback or, better yet, a pull request.
 
 Current Features
 ----------------
