@@ -163,3 +163,26 @@ If you're using a version of Ubuntu with Upstart (e.g. 14.04), you can copy the 
 License
 -------
 Compose is licensed under the terms of the GPLv3 license. See LICENSE.txt for the full license text.
+
+Todo List
+---------
+☑ Index
+☑ View Posts
+☑ Create/Edit/Delete Posts
+☑ Markdown Support
+☑ Basic User Authentication
+☑ File Uploads
+☑ Basic Post and File Caching Headers
+☑ Custom/Changeable Post Slugs
+☐ User Images and Biography Pages?
+☐ Post Previews
+☐ API Error Handling
+☐ API Documentation
+☐ Better Error Handling/Reporting
+☐ Multi User Management and Privileges
+☐ Limit Number of Failed Logins per IP address
+☐ Live Theme Switching
+☐ Logging
+☐ Statistics
+☐ Dashboard
+☐ Post Revision Tracking
