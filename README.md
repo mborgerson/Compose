@@ -1,6 +1,6 @@
 Compose
 =======
-**Compose** is a simple blogging platform that I initially built over the course of a couple weekends to write and serve content on my [website](https://mborgerson.com).
+**Compose** is a really simple blogging platform that I built over the course of a couple weekends to write and serve content on my [website](https://mborgerson.com).
 
 I decided to use the [Go Programming Language](https://golang.org/) over other more popular languages largely because it's a language that I had been wanting to learn. As someone who loves C and Python, I think Go is pretty awesome. I highly recommend spending some time with it or trying it out for your next project. [MongoDB](https://www.mongodb.org/) is used to store all the data.
 
@@ -20,15 +20,15 @@ Installing
 
 ### Install Required Dependencies
 
-Install Go and Git
+Install Go
 
 On Ubuntu
 
-    $ sudo apt-get install golang git
+    $ sudo apt-get install golang
 
 On Mac OS X
 
-    $ brew install go git
+    $ brew install go
 
 #### Install MongoDB
 
@@ -53,7 +53,7 @@ On Mac OS X
 
 ### Install Compose
 
-    $ go install github.com/mborgerson/compose
+    $ go install github.com/mborgerson/Compose/compose
 
 Building the Themes
 -------------------
@@ -79,12 +79,9 @@ Now, move to the theme_admin directory.
 
     $ cd theme_admin
 
-Install Node.js packages.
+Install Node.js packages and client-side dependencies.
 
     $ npm install
-
-Install client-side dependencies.
-
     $ bower install
 
 ### Build
@@ -99,6 +96,8 @@ Do the same for theme_site.
 
 Running
 -------
+Assuming you're serving from an Ubuntu box...
+
 First, make sure mongod is running.
 
     $ service mongod status
@@ -107,12 +106,9 @@ For testing purposes, you can start the MongoDB daemon manually with a specific 
 
     $ mongod --dbpath=./db
 
-Next, as described above, make sure that the `GOPATH` environment variable is set.
+Next, as described above, make sure that the `GOPATH` environment variable is set. For convenience, add the workspace **bin** directory to the `PATH` environment variable.
 
     $ export GOPATH=$HOME/go
-
-Next, for convenience, add the workspace **bin** directory to the `PATH` environment variable.
-
     $ export PATH=$PATH:$GOPATH
 
 Finally, run Compose.
@@ -182,8 +178,10 @@ Todo List
 ☑ Basic User Authentication
 ☑ File Uploads
 ☑ Basic Post and File Caching Headers
+☑ Drafts
 ☑ Custom/Changeable Post Slugs
-☐ User Images and Biography Pages?
+☐ User Images and Biography Pages
+☐ Non-blog Pages (About, Contact, etc)
 ☐ Post Previews
 ☐ API Error Handling
 ☐ API Documentation
