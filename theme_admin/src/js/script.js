@@ -152,14 +152,37 @@ angular.module('Admin', ["ngRoute", "ui.ace", "ui.bootstrap.datetimepicker"])
     }
   }
 
+  $scope.showAlertMessage = function(type, msg) {
+    $scope.alertSuccessMessage = ""
+    $scope.alertDangerMessage = ""
+    $scope.alertWarningMessage = ""
+    switch (type) {
+    case "success": $scope.alertSuccessMessage = msg; break;
+    case "danger": $scope.alertDangerMessage = msg; break;
+    case "warning": $scope.alertWarningMessage = msg; break;
+    }
+  }
+
+  $scope.showDangerMessage = function(msg) {
+    $scope.showAlertMessage("danger", msg)
+  }
+
+  $scope.showWarningMessage = function(msg) {
+    $scope.showAlertMessage("warning", msg)
+  }
+
+  $scope.showSuccessMessage = function(msg) {
+    $scope.showAlertMessage("success", msg)
+  }
+
   $scope.save = function() {
     $http.put("/api/post/" + $routeParams.postId, $scope.article).
     success(function(data, status, headers, config) {
-      console.log("saved!");
       $scope.postIsDirty = false;
+      $scope.showSuccessMessage("Saved!");
     }).
     error(function(data, status, headers, config) {
-      console.log("error!");
+      $scope.showDangerMessage("Unable to save post!");
     });
   };
 

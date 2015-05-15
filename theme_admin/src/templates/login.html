@@ -3,6 +3,8 @@
 <head>
   <title>Login</title>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script type="text/javascript" src="/admin/assets/js/main.js"></script>
   <link rel="stylesheet" href="/admin/assets/css/style.min.css">
 </head>
 <body>
@@ -10,7 +12,8 @@
     <div class="page-header">
       <h1>Login</h1>
     </div>
-    <form action="/login" method="post">
+    <div id="alert_message" class="alert alert-danger" role="alert"></div>
+    <form id="login_form" action="/login" method="post">
       <div class="form-group">
         <label for="inputEmail">E-mail</label>
         <input name="email" type="email" class="form-control" id="inputEmail" placeholder="E-mail">
@@ -19,8 +22,26 @@
         <label for="inputPassword">Password</label>
         <input name="password" type="password" class="form-control" id="inputPassword" placeholder="Password">
       </div>
-      <button type="submit" class="btn btn-default">Login</button>
+      <button id="submit_button" type="submit" class="btn btn-default">Login</button>
     </form>
   </div>
+  <script type="text/javascript">
+  $("#alert_message").hide()
+  $("#login_form").submit(function(event) {
+    event.preventDefault()
+    $("#submit_button").prop('disabled', true)
+    $.post("/login", $("#login_form").serialize(), function(){
+        window.location.pathname = '/admin'
+    }).fail(function(data, textStatus, error) {
+      if (data.status == 401) {
+        $("#alert_message").html("<b>Error:</b> Invalid e-mail or password.")
+      } else {
+        $("#alert_message").html("<b>Error:</b> Unexpected error occured.")
+      }
+        $("#alert_message").show()
+      $("#submit_button").prop('disabled', false)
+    })
+  })
+  </script>
 </body>
 </html>

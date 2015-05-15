@@ -96,8 +96,13 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
                                            Value: session.Token,
                                            Path:  "/"})
 
-            // Continue to admin page.
-            http.Redirect(w, r, "/admin", http.StatusSeeOther)
+            // If this was an XMLHttpRequest, just return 200 OK.
+            if r.Header.Get("X-Requested-With") == "XMLHttpRequest" {
+                w.WriteHeader(http.StatusOK)
+            } else {
+                // Continue to admin page.
+                http.Redirect(w, r, "/admin", http.StatusSeeOther)
+            }
         } else {
             // Bad credentials!
             http.Redirect(w, r, "/login", http.StatusUnauthorized)

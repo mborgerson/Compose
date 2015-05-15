@@ -36,10 +36,10 @@ gulp.task('scripts', function() {
     'bower_components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js',
     'src/js/**/*.js'])
     .pipe(concat('main.js'))
-    .pipe(gulp.dest('dist/assets/js'))
-    .pipe(rename({suffix: '.min'}))
-    .pipe(uglify())
     .pipe(gulp.dest('dist/assets/js'));
+    //.pipe(rename({suffix: '.min'}))
+    //.pipe(uglify())
+    //.pipe(gulp.dest('dist/assets/js'));
 });
 
 gulp.task('fonts', function() {
