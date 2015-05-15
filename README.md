@@ -45,7 +45,7 @@ On Mac OS X
 
 ### Setup Go Workspace
 
-    For those unfamiliar with Go, a workspace is needed when developing or installing Go packages. To create a workspace, simply assign the `GOPATH` environment variable.
+For those unfamiliar with Go, a workspace is needed when developing or installing Go packages. To create a workspace, simply assign the `GOPATH` environment variable.
 
     $ mkdir $HOME/go
     $ export GOPATH=$HOME/go
@@ -119,11 +119,11 @@ This will create a config file if one does not already exist. Now, run again.
 
     $ compose
 
-This will start an HTTP server listening at [http://127.0.0.1:8080](http://127.0.0.1:8080).
+This will start an HTTP server listening at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-Navigate to [http://127.0.0.1:8080/setup](http://127.0.0.1:8080/setup) to initialize the database.
+Navigate to [http://127.0.0.1:8000/setup](http://127.0.0.1:8000/setup) to initialize the database.
 
-Now, you can login and write content at [http://127.0.0.1:8080/login](http://127.0.0.1:8080/login).
+Now, you can login and write content at [http://127.0.0.1:8000/login](http://127.0.0.1:8000/login).
 
 Deployment
 ----------
@@ -171,25 +171,27 @@ Compose is licensed under the terms of the GPLv3 license. See LICENSE.txt for th
 
 Todo List
 ---------
-☑ Index
-☑ View Posts
-☑ Create/Edit/Delete Posts
-☑ Markdown Support
-☑ Basic User Authentication
-☑ File Uploads
-☑ Basic Post and File Caching Headers
-☑ Drafts
-☑ Custom/Changeable Post Slugs
-☐ User Images and Biography Pages
-☐ Non-blog Pages (About, Contact, etc)
-☐ Post Previews
-☐ API Error Handling
-☐ API Documentation
-☐ Better Error Handling/Reporting
-☐ Multi User Management and Privileges
-☐ Limit Number of Failed Logins per IP address
-☐ Live Theme Switching
-☐ Logging
-☐ Statistics
-☐ Dashboard
-☐ Post Revision Tracking
+Just some features I had in mind:
+
+    ☑ Index
+    ☑ View Posts
+    ☑ Create/Edit/Delete Posts
+    ☑ Markdown Support
+    ☑ Basic User Authentication
+    ☑ File Uploads
+    ☑ Basic Post and File Caching Headers
+    ☑ Drafts
+    ☑ Custom/Changeable Post Slugs
+    ☐ User Images and Biography Pages
+    ☐ Non-blog Pages (About, Contact, etc)
+    ☐ Post Previews
+    ☐ API Error Handling
+    ☐ API Documentation
+    ☐ Better Error Handling/Reporting
+    ☐ Multi User Management and Privileges
+    ☐ Limit Number of Failed Logins per IP address
+    ☐ Live Theme Switching
+    ☐ Logging
+    ☐ Statistics
+    ☐ Dashboard
+    ☐ Post Revision Tracking
